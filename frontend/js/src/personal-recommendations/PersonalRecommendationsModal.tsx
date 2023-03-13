@@ -97,6 +97,10 @@ export default NiceModal.create(
           const newSuggestions = followers.filter((username) =>
             includes(toLower(username), toLower(event.target.value))
           );
+          // eslint-disable-next-line no-console
+          console.log(followers);
+          // eslint-disable-next-line no-console
+          console.log(newSuggestions);
           setSuggestions(newSuggestions);
         } else {
           setSuggestions([]);
