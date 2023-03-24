@@ -2,6 +2,7 @@ from typing import List
 
 from pydantic import BaseModel, NonNegativeInt, validator, constr
 
+from data.model.common_stat_spark import StatMessage
 from data.model.validators import check_valid_uuid
 
 
@@ -28,3 +29,9 @@ class ArtistListenerRecord(BaseModel):
 
 
 EntityListenerRecord = ArtistListenerRecord
+
+
+class EntityListenerStatMessage(StatMessage[EntityListenerRecord]):
+    """ Format of messages sent to the ListenBrainz Server """
+    entity: constr(min_length=1)  # The entity for which stats are calculated, i.e artist, release or recording
+

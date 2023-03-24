@@ -6,9 +6,7 @@ from typing import Iterator, Optional, Dict, List
 from more_itertools import chunked
 from pydantic import ValidationError
 
-from data.model.common_stat_spark import StatMessage
-from data.model.entity_listener_stat import EntityListenerRecord, ArtistListenerRecord
-from data.model.user_entity import UserEntityStatMessage
+from data.model.entity_listener_stat import EntityListenerRecord, ArtistListenerRecord, EntityListenerStatMessage
 from listenbrainz_spark.path import RELEASE_METADATA_CACHE_DATAFRAME, ARTIST_COUNTRY_CODE_DATAFRAME
 from listenbrainz_spark.stats import get_dates_for_stats_range
 from listenbrainz_spark.stats.listener import artist
@@ -111,7 +109,7 @@ def create_messages(data, entity: str, stats_range: str, from_date: datetime, to
             multiple_entity_stats.append(processed_stat)
 
         try:
-            model = StatMessage[EntityListenerRecord](**{
+            model = EntityListenerStatMessage(**{
                 "type": "entity_listener",
                 "stats_range": stats_range,
                 "from_ts": from_ts,
