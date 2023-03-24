@@ -77,7 +77,12 @@ def _handle_stats(message, stats_type):
 
 def handle_user_entity(message):
     """ Take entity stats for a user and save it in the database. """
-    _handle_stats(message, message["entity"])
+    _handle_stats(message, f'user {message["entity"]}')
+
+
+def handle_entity_listener(message):
+    """ Take listener stats for an entity and save it in the database """
+    _handle_stats(message, f'{message["entity"]} listeners')
 
 
 def handle_user_listening_activity(message):
