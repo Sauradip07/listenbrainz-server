@@ -1,9 +1,10 @@
 from typing import Iterator
 
+from data.model.entity_listener_stat import ArtistListenerRecord
 from listenbrainz_spark.stats import run_query
 
 
-def get_listeners(table: str, cache_table: str, number_of_results: int) -> Iterator[ArtistListenRecord]:
+def get_listeners(table: str, cache_table: str, number_of_results: int) -> Iterator[ArtistListenerRecord]:
     """ Get information about top listeners of an artist
 
         Args:
