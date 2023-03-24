@@ -10,14 +10,13 @@ from data.model.entity_listener_stat import EntityListenerRecord, ArtistListener
 from data.model.user_entity import UserEntityStatMessage
 from listenbrainz_spark.path import RELEASE_METADATA_CACHE_DATAFRAME, ARTIST_COUNTRY_CODE_DATAFRAME
 from listenbrainz_spark.stats import get_dates_for_stats_range
-from listenbrainz_spark.stats.user import USERS_PER_MESSAGE
-from listenbrainz_spark.stats.user.artist import get_artists
+from listenbrainz_spark.stats.listener import artist
 from listenbrainz_spark.utils import get_listens_from_dump, read_files_from_HDFS
 
 logger = logging.getLogger(__name__)
 
 entity_handler_map = {
-    "artists": get_artists,
+    "artists": artist.get_listeners,
 }
 
 entity_model_map = {
@@ -26,8 +25,11 @@ entity_model_map = {
 
 entity_cache_map = {
     "artists": ARTIST_COUNTRY_CODE_DATAFRAME,
+    "releases": RELEASE_METADATA_CACHE_DATAFRAME,
+    "recordings": RELEASE_METADATA_CACHE_DATAFRAME
 }
 
+ENTITIES_PER_MESSAGE = 10000  # number of entities per message
 NUMBER_OF_TOP_LISTENERS = 10  # number of top listeners to retain for user stats
 
 
@@ -101,7 +103,7 @@ def create_messages(data, entity: str, stats_range: str, from_date: datetime, to
     from_ts = int(from_date.timestamp())
     to_ts = int(to_date.timestamp())
 
-    for entries in chunked(data, USERS_PER_MESSAGE):
+    for entries in chunked(data, ENTITIES_PER_MESSAGE):
         multiple_entity_stats = []
         for entry in entries:
             processed_stat = parse_one_entity_stats(entry, entity, stats_range)
