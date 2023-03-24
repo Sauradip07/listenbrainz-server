@@ -1,11 +1,12 @@
 import json
 import logging
 from datetime import datetime
-from typing import Iterator, Optional, Dict
+from typing import Iterator, Optional, Dict, List
 
 from more_itertools import chunked
 from pydantic import ValidationError
 
+from data.model.common_stat_spark import StatMessage
 from data.model.entity_listener_stat import EntityListenerRecord, ArtistListenerRecord
 from data.model.user_entity import UserEntityStatMessage
 from listenbrainz_spark.path import RELEASE_METADATA_CACHE_DATAFRAME, ARTIST_COUNTRY_CODE_DATAFRAME
@@ -110,7 +111,7 @@ def create_messages(data, entity: str, stats_range: str, from_date: datetime, to
             multiple_entity_stats.append(processed_stat)
 
         try:
-            model = UserEntityStatMessage(**{
+            model = StatMessage[List[EntityListenerRecord]](**{
                 "type": "entity_listener",
                 "stats_range": stats_range,
                 "from_ts": from_ts,
