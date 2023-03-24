@@ -31,8 +31,7 @@ entity_cache_map = {
 NUMBER_OF_TOP_LISTENERS = 10  # number of top listeners to retain for user stats
 
 
-def get_entity_stats(entity: str, stats_range: str, message_type: str = "user_entity", database: str = None)\
-        -> Iterator[Optional[Dict]]:
+def get_listener_stats(entity: str, stats_range: str, database: str = None) -> Iterator[Optional[Dict]]:
     """ Get the top listeners for all entity for specified stats_range """
     logger.debug(f"Calculating {entity}_listener_{stats_range}...")
 
