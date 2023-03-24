@@ -111,7 +111,7 @@ def create_messages(data, entity: str, stats_range: str, from_date: datetime, to
             multiple_entity_stats.append(processed_stat)
 
         try:
-            model = StatMessage[List[EntityListenerRecord]](**{
+            model = StatMessage[EntityListenerRecord](**{
                 "type": "entity_listener",
                 "stats_range": stats_range,
                 "from_ts": from_ts,
