@@ -95,7 +95,7 @@ class SparkReader(ConsumerMixin):
     def process_response(self, response):
         try:
             response_type = response['type']
-        except KeyError:
+        except (TypeError, KeyError):
             self.app.logger.error("Bad response sent to spark_reader: %s", json.dumps(response, indent=4),
                                   exc_info=True)
             return

@@ -124,7 +124,6 @@ def create_messages(data, entity: str, stats_range: str, from_date: datetime, to
             yield result
         except ValidationError:
             logger.error(f"ValidationError while calculating {stats_range} top {entity}:", exc_info=True)
-            yield None
 
     yield {
         "type": "couchdb_data_end",
