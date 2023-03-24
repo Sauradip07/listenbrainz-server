@@ -40,7 +40,7 @@ from listenbrainz.db import couchdb
 SITEWIDE_STATS_USER_ID = 15753
 
 
-def insert(database: str, from_ts: int, to_ts: int, values: list[dict]):
+def insert(database: str, from_ts: int, to_ts: int, values: list[dict], key="user_id"):
     """ Insert stats in couchdb.
 
         Args:
@@ -48,11 +48,12 @@ def insert(database: str, from_ts: int, to_ts: int, values: list[dict]):
             from_ts: the start of the time period for which the stat is
             to_ts: the end of the time period for which the stat is
             values: list with each item as stat for 1 user
+            key: the key of the value to user as _id of the document
     """
     with start_span(op="processing", description="add _id, from_ts, to_ts and last_updated to docs"):
         for doc in values:
-            doc["_id"] = str(doc["user_id"])
-            doc["key"] = doc["user_id"]
+            doc["_id"] = str(doc[key])
+            doc["key"] = doc[key]
             doc["from_ts"] = from_ts
             doc["to_ts"] = to_ts
             doc["last_updated"] = int(datetime.now().timestamp())
