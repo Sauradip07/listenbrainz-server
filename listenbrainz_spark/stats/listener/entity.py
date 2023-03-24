@@ -66,7 +66,7 @@ def parse_one_entity_stats(entry, entity: str, stats_range: str) \
         -> Optional[EntityListenerRecord]:
     try:
         data = entry.asDict(recursive=True)
-        return entity_model_map[stats_range](**data)
+        return entity_model_map[entity](**data)
     except ValidationError:
         logger.error(f"""ValidationError while calculating {stats_range} top {entity} for user: 
         {data["user_id"]}. Data: {json.dumps(data, indent=2)}""", exc_info=True)
