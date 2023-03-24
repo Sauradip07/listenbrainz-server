@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel, NonNegativeInt, validator, constr
 
 from data.model.validators import check_valid_uuid
@@ -20,7 +22,7 @@ class ArtistListenerRecord(BaseModel):
     artist_mbid: str
     artist_name: constr(min_length=1)
     total_listen_count: NonNegativeInt
-    users: list[UserListenRecord]
+    users: List[UserListenRecord]
 
     _validate_uuids: classmethod = validator("artist_mbid", allow_reuse=True)(check_valid_uuid)
 

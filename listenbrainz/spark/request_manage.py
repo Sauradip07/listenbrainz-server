@@ -100,12 +100,12 @@ def request_user_stats(type_, range_, entity, database):
     params = {
         "stats_range": range_
     }
-    if type_ == "entity" and entity:
+    if type_ in ["entity", "listener"] and entity:
         params["entity"] = entity
 
     if not database:
         today = date.today().strftime("%Y%m%d")
-        prefix = entity if type_ == "entity" else type_
+        prefix = entity if type_ in ["entity", "listener"] else type_
         database = f"{prefix}_{range_}_{today}"
 
     params["database"] = database
