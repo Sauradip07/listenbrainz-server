@@ -71,7 +71,8 @@ def get_listeners(table: str, cache_table: str, number_of_results: int) -> Itera
                    ) as users
               FROM ranked_stats
              WHERE rank <= {number_of_results}
-          GROUP BY user_id
+          GROUP BY artist_mbid
+                 , artist_name
         )
             SELECT artist_mbid
                  , artist_name
