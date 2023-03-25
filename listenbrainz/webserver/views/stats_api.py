@@ -242,8 +242,6 @@ def _get_entity_stats(user_name: str, entity: str, count_key: str):
 
     entity_list, total_entity_count = _process_user_entity(stats, offset, count)
 
-    entity = "artists" if entity == "test_artists" else entity
-
     return jsonify({"payload": {
         "user_id": user_name,
         entity: entity_list,
@@ -482,6 +480,38 @@ def get_artist_map(user_name: str):
             "artist_map": [x.dict() for x in result.data.__root__]
         }
     })
+
+
+@stats_api_bp.route("/artist/<artist_mbid>/listeners")
+@crossdomain
+@ratelimit()
+def get_artist_listeners(artist_mbid):
+    """ Get top listeners for artist ``artist_mbid``. """
+    stats_range = request.args.get("range", default="all_time")
+    if not _is_valid_range(stats_range):
+        raise APIBadRequest(f"Invalid range: {stats_range}")
+
+    stats = db_stats.get_entity_listener("artists", artist_mbid, stats_range)
+    if stats is None:
+        raise APINoContent("")
+
+    return jsonify({"payload": stats})
+
+
+@stats_api_bp.route("/release/<release_mbid>/listeners")
+@crossdomain
+@ratelimit()
+def get_release_listeners(release_mbid):
+    """ Get top listeners for release ``release_mbid``. """
+    stats_range = request.args.get("range", default="all_time")
+    if not _is_valid_range(stats_range):
+        raise APIBadRequest(f"Invalid range: {stats_range}")
+
+    stats = db_stats.get_entity_listener("releases", release_mbid, stats_range)
+    if stats is None:
+        raise APINoContent("")
+
+    return jsonify({"payload": stats})
 
 
 @stats_api_bp.route("/sitewide/artists")

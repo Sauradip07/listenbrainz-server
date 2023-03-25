@@ -33,6 +33,7 @@ from sentry_sdk import start_span
 from data.model.common_stat import StatApi
 from data.model.user_artist_map import UserArtistMapRecord
 from listenbrainz.db import couchdb
+from listenbrainz.db.user import get_users_by_id
 
 # sitewide statistics are stored in the user statistics table
 # as statistics for a special user with the following user_id.
@@ -87,10 +88,55 @@ def get(user_id, stats_type, stats_range, stats_model) -> Optional[StatApi]:
         current_app.logger.error(f"{e}. Response: %s", e.response.json(), exc_info=True)
     except (ValidationError, KeyError) as e:
         current_app.logger.error(
-            f"{e}. Occurred while processing {stats_range} top artists for user_id: {user_id}"
-            f" and data: {orjson.dumps(data, indent=4).decode('utf-8')}", exc_info=True)
+            f"{e}. Occurred while processing {stats_range} {stats_type} for user_id: {user_id}"
+            f" and data: {orjson.dumps(data, option=orjson.OPT_INDENT_2).decode('utf-8')}", exc_info=True)
     return None
 
+
+def get_entity_listener(entity, entity_id, stats_range) -> Optional[dict]:
+    """ Retrieve stats for the given entity, stats range and stats type.
+
+        Args:
+            entity: the type of stat entity
+            entity_id: the mbid of the particular entity item
+            stats_range: time period to retrieve stats for
+    """
+    prefix = f"{entity}_listener_{stats_range}"
+    try:
+        data = couchdb.fetch_data(prefix, entity_id)
+        if data is not None:
+            users_map = get_users_by_id([x["user_id"] for x in data["listeners"]])
+            listeners = []
+            for x in data["listeners"]:
+                user_name = users_map.get(x["user_id"])
+                if user_name:
+                    listeners.append({"user_name": user_name, "listen_count": x["listen_count"]})
+
+            stats = {
+                "from_ts": data["from_ts"],
+                "to_ts": data["to_ts"],
+                "last_updated": data["last_updated"],
+                "total_listen_count": data["total_listen_count"],
+                "stats_range": stats_range,
+                "listeners": listeners,
+            }
+
+            if entity == "artists":
+                stats["artist_name"] = data["artist_name"]
+                stats["artist_mbid"] = data["artist_mbid"]
+            elif entity == "releases":
+                stats["release_name"] = data["release_name"]
+                stats["release_mbid"] = data["release_mbid"]
+
+            return stats
+
+    except HTTPError as e:
+        current_app.logger.error(f"{e}. Response: %s", e.response.json(), exc_info=True)
+    except (ValidationError, KeyError) as e:
+        current_app.logger.error(
+            f"{e}. Occurred while processing {stats_range} {entity} for mbid: {entity_id}"
+            f" and data: {orjson.dumps(data, option=orjson.OPT_INDENT_2).decode('utf-8')}", exc_info=True)
+    return None
 
 def insert_artist_map(user_id: int, stats_range: str, from_ts: int, to_ts: int, data: list[UserArtistMapRecord]):
     """ Insert artist map stats in database.

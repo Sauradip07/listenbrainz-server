@@ -6,26 +6,28 @@ from typing import Iterator, Optional, Dict, List
 from more_itertools import chunked
 from pydantic import ValidationError
 
-from data.model.entity_listener_stat import EntityListenerRecord, ArtistListenerRecord, EntityListenerStatMessage
+from data.model.entity_listener_stat import EntityListenerRecord, ArtistListenerRecord, EntityListenerStatMessage, \
+    ReleaseListenerRecord
 from listenbrainz_spark.path import RELEASE_METADATA_CACHE_DATAFRAME, ARTIST_COUNTRY_CODE_DATAFRAME
 from listenbrainz_spark.stats import get_dates_for_stats_range
-from listenbrainz_spark.stats.listener import artist
+from listenbrainz_spark.stats.listener import artist, release
 from listenbrainz_spark.utils import get_listens_from_dump, read_files_from_HDFS
 
 logger = logging.getLogger(__name__)
 
 entity_handler_map = {
     "artists": artist.get_listeners,
+    "releases": release.get_listeners,
 }
 
 entity_model_map = {
     "artists": ArtistListenerRecord,
+    "releases": ReleaseListenerRecord,
 }
 
 entity_cache_map = {
     "artists": ARTIST_COUNTRY_CODE_DATAFRAME,
     "releases": RELEASE_METADATA_CACHE_DATAFRAME,
-    "recordings": RELEASE_METADATA_CACHE_DATAFRAME
 }
 
 ENTITIES_PER_MESSAGE = 10000  # number of entities per message
@@ -69,8 +71,8 @@ def parse_one_entity_stats(entry, entity: str, stats_range: str) \
         data = entry.asDict(recursive=True)
         return entity_model_map[entity](**data)
     except ValidationError:
-        logger.error(f"""ValidationError while calculating {stats_range} top {entity} for user: 
-        {data["user_id"]}. Data: {json.dumps(data, indent=2)}""", exc_info=True)
+        logger.error(f"""ValidationError while calculating {stats_range} listeners of {entity}.
+         Data: {json.dumps(data, indent=2)}""", exc_info=True)
         return None
 
 
